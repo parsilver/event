@@ -21,14 +21,14 @@ type TimingMiddleware struct{}
 
 func (m *TimingMiddleware) Handle(e event.Event) bool {
 	start := time.Now()
-	
+
 	// We return true to continue processing
 	// The actual timing will be logged after all listeners have processed
-	
+
 	// Store the start time in the event arguments for later retrieval
 	args := e.Arguments()
 	args["_timing_start"] = start
-	
+
 	return true
 }
 
@@ -40,7 +40,7 @@ func (m *TimingCleanupMiddleware) Handle(e event.Event) bool {
 	if startTime, ok := args["_timing_start"].(time.Time); ok {
 		duration := time.Since(startTime)
 		log.Printf("[TIMING] Event %s took %v to process", e.Name(), duration)
-		
+
 		// Clean up our internal timing data
 		delete(args, "_timing_start")
 	}
@@ -105,22 +105,22 @@ func (s *NotificationSubscriber) GetSubscribedEvents() map[string][]event.Subscr
 func MiddlewareExample() {
 	// Create a dispatcher
 	dispatcher := event.NewDispatcher()
-	
+
 	// Add middleware with very high and very low priorities to wrap all other listeners
-	dispatcher.AddListener("order.created", &TimingMiddleware{}, 1000)      // Run first
-	dispatcher.AddListener("order.created", &LoggingMiddleware{}, 900)      // Run second
+	dispatcher.AddListener("order.created", &TimingMiddleware{}, 1000)         // Run first
+	dispatcher.AddListener("order.created", &LoggingMiddleware{}, 900)         // Run second
 	dispatcher.AddListener("order.created", &TimingCleanupMiddleware{}, -1000) // Run last
-	
+
 	// Add business logic listeners
 	dispatcher.AddListener("order.created", &OrderProcessor{}, 100)
-	
+
 	// Add subscribers
 	event.RegisterSubscriber(dispatcher, &NotificationSubscriber{})
-	
+
 	// Create and dispatch an event
 	orderEvent := NewOrderCreatedEvent("ORD-12345", "CUST-789", 99.99)
 	dispatcher.Dispatch(orderEvent)
-	
+
 	// Create and dispatch another event
 	anotherOrder := NewOrderCreatedEvent("ORD-67890", "CUST-456", 149.99)
 	dispatcher.Dispatch(anotherOrder)

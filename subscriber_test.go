@@ -47,14 +47,14 @@ func (s *TestSubscriber) GetSubscribedEvents() map[string][]event.SubscriberConf
 func TestSubscriber_Registration(t *testing.T) {
 	dispatcher := event.NewDispatcher()
 	subscriber := NewTestSubscriber()
-	
+
 	// Register subscriber
 	event.RegisterSubscriber(dispatcher, subscriber)
-	
+
 	// Dispatch events
 	dispatcher.Dispatch(event.NewEvent("user.created"))
 	dispatcher.Dispatch(event.NewEvent("user.updated"))
-	
+
 	// Verify both methods were called
 	assert.True(t, subscriber.calledEvents["user.created"])
 	assert.True(t, subscriber.calledEvents["user.updated"])
@@ -62,27 +62,27 @@ func TestSubscriber_Registration(t *testing.T) {
 
 func TestSubscriber_PriorityRespected(t *testing.T) {
 	dispatcher := event.NewDispatcher()
-	
+
 	var callOrder []string
-	
+
 	// Create listeners directly with different priorities
 	listener1 := event.ListenerFunc(func(e event.Event) bool {
 		callOrder = append(callOrder, "listener1")
 		return true
 	})
-	
+
 	listener2 := event.ListenerFunc(func(e event.Event) bool {
 		callOrder = append(callOrder, "listener2")
 		return true
 	})
-	
+
 	// Add listeners with different priorities
 	dispatcher.AddListener("test.event", listener1, 10)  // Lower priority
 	dispatcher.AddListener("test.event", listener2, 100) // Higher priority
-	
+
 	// Dispatch event
 	dispatcher.Dispatch(event.NewEvent("test.event"))
-	
+
 	// Verify call order based on priority (higher priority first)
 	assert.Equal(t, []string{"listener2", "listener1"}, callOrder)
 }

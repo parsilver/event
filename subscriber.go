@@ -9,7 +9,7 @@ import (
 type SubscriberConfig struct {
 	// Method is the name of the method to call on the subscriber.
 	Method string
-	
+
 	// Priority is the priority of the listener.
 	Priority int
 }
@@ -31,7 +31,7 @@ func (f SubscriberFunc) GetSubscribedEvents() map[string][]SubscriberConfig {
 // RegisterSubscriber registers a subscriber with the dispatcher.
 func RegisterSubscriber(dispatcher Dispatcher, subscriber Subscriber) {
 	subscribedEvents := subscriber.GetSubscribedEvents()
-	
+
 	for eventName, configs := range subscribedEvents {
 		for _, config := range configs {
 			// Create a listener for each method
@@ -46,11 +46,11 @@ func RegisterSubscriber(dispatcher Dispatcher, subscriber Subscriber) {
 func RegisterListener(dispatcher Dispatcher, target interface{}, methodName string, handler func(Event) bool) {
 	// Create a listener from the handler function
 	listener := ListenerFunc(handler)
-	
+
 	// Get the subscriber's registered events
 	if subscriber, ok := target.(Subscriber); ok {
 		subscribedEvents := subscriber.GetSubscribedEvents()
-		
+
 		// Find all event names that use this method
 		for eventName, configs := range subscribedEvents {
 			for _, config := range configs {
@@ -70,15 +70,15 @@ func createListenerFromSubscriber(subscriber interface{}, methodName string) Lis
 		if !method.IsValid() {
 			panic(fmt.Sprintf("Method %s does not exist on subscriber %T", methodName, subscriber))
 		}
-		
+
 		// Call the method with the event
 		results := method.Call([]reflect.Value{reflect.ValueOf(event)})
-		
+
 		// Check if the method returned a boolean
 		if len(results) > 0 && results[0].Kind() == reflect.Bool {
 			return results[0].Bool()
 		}
-		
+
 		// Default to true if the method doesn't return a boolean
 		return true
 	})

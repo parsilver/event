@@ -4,21 +4,21 @@ package event
 type Event interface {
 	// Name returns the name of the event.
 	Name() string
-	
+
 	// Arguments returns the arguments for the event.
 	Arguments() map[string]interface{}
-	
+
 	// StopPropagation stops the propagation of the event to further listeners.
 	StopPropagation()
-	
+
 	// IsPropagationStopped returns whether the propagation of this event has been stopped.
 	IsPropagationStopped() bool
 }
 
 // BaseEvent provides a basic implementation of the Event interface.
 type BaseEvent struct {
-	name              string
-	arguments         map[string]interface{}
+	name               string
+	arguments          map[string]interface{}
 	propagationStopped bool
 }
 
@@ -30,7 +30,7 @@ func NewEvent(name string, arguments ...map[string]interface{}) *BaseEvent {
 	} else {
 		args = make(map[string]interface{})
 	}
-	
+
 	return &BaseEvent{
 		name:      name,
 		arguments: args,
